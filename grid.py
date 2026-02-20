@@ -1,4 +1,5 @@
 from typing import List
+from enum import IntEnum
 
 
 class Grid:
@@ -8,17 +9,16 @@ class Grid:
     Each cell contains an integer encoding its wall configuration
     using 4 bits:
 
-        Bit 0 (1)  -> North wall
-        Bit 1 (2)  -> East wall
-        Bit 2 (4)  -> South wall
-        Bit 3 (8)  -> West wall
+        Bit 0  -> North wall
+        Bit 1  -> East wall
+        Bit 2  -> South wall
+        Bit 3  -> West wall
 
     A bit value of 1 means the wall is CLOSED.
     A bit value of 0 means the wall is OPEN.
 
-    During initialization, cells are set to -1.
-    The value -1 indicates that the cell has not yet been assigned
-    a valid wall configuration.
+    During initialization, cells are set to 15.
+    The value 15 indicates that the cell has four closed doors (1111).
     """
     # 2D matrix of cells: cells[row][col]
     cells: List[List[int]]
@@ -30,8 +30,8 @@ class Grid:
         :param width: Number of columns
         :param height: Number of rows
         """
-        # Initialize all cells to -1 (uninitialized state)
-        self.cells = [[-1 for _ in range(width)] for _ in range(height)]
+        # Initialize all cells to 15
+        self.cells = [[15 for _ in range(width)] for _ in range(height)]
         # Store grid center coordinates (row, column)
         # Useful for positioning the "42" pattern
         self.center = tuple([height // 2, width // 2])
@@ -51,4 +51,41 @@ class Grid:
         """
         for row in self.cells:
             print([hex(cell).removeprefix("0x").upper()
-                   if cell != -1 else "*" for cell in row])
+                   for cell in row])
+
+
+class Wall(IntEnum):
+    """
+    Represents the four walls of a grid cell.
+
+    Each wall is encoded as a power of two so it can be used
+    as a bit flag inside a single integer (0-15).
+
+    Bit representation:
+        NORTH = 0001
+        EAST  = 0010
+        SOUTH = 0100
+        WEST  = 1000
+
+    This design allows efficient wall manipulation using
+    bitwise operations (&, |, ~).
+    """
+    NORTH = 1
+    EAST = 2
+    SOUTH = 4
+    WEST = 8
+
+    def opposite(self) -> "Wall":
+        """
+        Return the opposite wall.
+
+        Useful when removing a wall between two adjacent cells.
+        Example:
+            If you open the EAST wall of the current cell,
+            you must also open the WEST wall of the neighboring cell.
+        """
+        return {
+            Wall.NORTH: Wall.SOUTH,
+            Wall.SOUTH: Wall.NORTH,
+            Wall.EAST: Wall.WEST,
+            Wall.WEST: Wall.EAST}[self]
