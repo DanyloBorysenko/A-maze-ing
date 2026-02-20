@@ -226,16 +226,14 @@ class TxtColorChanger:
 
 
 class TxtToImage:
-    def __init__(self, letter_map: Dict[str, ImgData]) -> None:
+    def __init__(self, base_letter_map: Dict[str, ImgData],
+                 extended_letter_dict: Dict[str, ImgData]) -> None:
         self.stages: List[Stages] = []
-        self.letter_map = letter_map
-        self.letter_dict: Dict[str, ImgData] = {}
+        self.base_letter_map = base_letter_map
+        self.extended_letter_map: Dict[str, ImgData] = {}
 
     def add_stages(self, stage: Stages):
         self.stages.append(stage)
-
-    def get_all_letters(self) -> Dict[str, ImgData]:
-        return self.letter_dict
 
     def print_txt(self, mlx: MlxVar, buff_img: ImgData, txt: str,
                   origin: Tuple, factor: float = 1.0, font_color=0xFFFFFFFF,
@@ -244,17 +242,17 @@ class TxtToImage:
         for letter in txt:
             try:
                 comb_key = f"{letter}_{factor}_{font_color}_{bg_color}"
-                img = self.letter_dict.get(comb_key)
+                img = self.extended_letter_map.get(comb_key)
                 if img is None:
                     try:
-                        img = self.letter_map[letter]
+                        img = self.base_letter_map[letter]
                     except KeyError:
-                        img = self.letter_map[" "]
+                        img = self.base_letter_map[" "]
                     for stage in self.stages:
                         img = stage.process(mlx, img, factor, font_color,
                                             bg_color)
                     if img is not None:
-                        self.letter_dict[comb_key] = img
+                        self.extended_letter_map[comb_key] = img
                 ImageOperations.copy_img(buff_img, img, (x, y))
                 x += img.w
             except Exception as e:
@@ -273,23 +271,24 @@ def tester():
         # copy_img_to_buffer(mlx.mlx.buff_img, mlx.mlx.letter_img, (0, 0))
         letter_map.create_map()
         ImageOperations.copy_img(
-            mlx.mlx.buff_img, mlx.mlx.letter_map["A"], (0, 0))
+            mlx.mlx.buff_img, mlx.mlx.base_letter_map["A"], (0, 0))
         ImageOperations.copy_img(
-            mlx.mlx.buff_img, mlx.mlx.letter_map["e"], (50, 0))
+            mlx.mlx.buff_img, mlx.mlx.base_letter_map["e"], (50, 0))
         ImageOperations.copy_img(
-            mlx.mlx.buff_img, mlx.mlx.letter_map["1"], (150, 0))
+            mlx.mlx.buff_img, mlx.mlx.base_letter_map["1"], (150, 0))
         ImageOperations.copy_img(
-            mlx.mlx.buff_img, mlx.mlx.letter_map["("], (100, 0))
+            mlx.mlx.buff_img, mlx.mlx.base_letter_map["("], (100, 0))
         ImageOperations.copy_img(
-            mlx.mlx.buff_img, mlx.mlx.letter_map[")"], (200, 0))
+            mlx.mlx.buff_img, mlx.mlx.base_letter_map[")"], (200, 0))
         scaler = ImageScaler()
-        scaled_a = scaler.process(mlx.mlx, mlx.mlx.letter_map["A"], 0.5)
+        scaled_a = scaler.process(mlx.mlx, mlx.mlx.base_letter_map["A"], 0.5)
         ImageOperations.copy_img(mlx.mlx.buff_img, scaled_a, (250, 0))
 
         letter_color = TxtColorChanger()
-        colored_a = letter_color.process(mlx.mlx, mlx.mlx.letter_map["A"])
+        colored_a = letter_color.process(mlx.mlx, mlx.mlx.base_letter_map["A"])
 
-        txt_to_img = TxtToImage(mlx.mlx.letter_map)
+        txt_to_img = TxtToImage(mlx.mlx.base_letter_map,
+                                mlx.mlx.extended_letter_map)
         txt_to_img.add_stages(scaler)
         txt_to_img.add_stages(letter_color)
         txt_to_img.print_txt(mlx.mlx, mlx.mlx.buff_img,

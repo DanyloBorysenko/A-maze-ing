@@ -1,5 +1,5 @@
 from typing import Tuple
-from srcs.mlx_tools.BaseMLX import MlxVar
+from srcs.mlx_tools.BaseMLX import MlxVarWithLetters
 from srcs.mlx_tools.mlx_errors import (
     ImgError
 )
@@ -8,7 +8,7 @@ from srcs.mlx_tools.ImageOperations import ImageOperations
 
 
 class LetterToImageMapper:
-    def __init__(self, mlx: MlxVar) -> None:
+    def __init__(self, mlx: MlxVarWithLetters) -> None:
         self.mlx = mlx
         self.image = "images/alphabets.xpm"
         self.letter_per_row = 9
@@ -32,7 +32,7 @@ class LetterToImageMapper:
                 self.num, 55, 45, 0, 30, w, h, 528)
             self.extract_different_letter_types(
                 self.symbols, 55, 45, 0, 30, w, h, 712)
-            self.mlx.letter_map[" "] = ImageOperations.generate_blank_image(
+            self.mlx.base_letter_map[" "] = ImageOperations.generate_blank_image(
                 self.mlx, 30, 50)
         except ImgError as e:
             raise ImgError(f"{type(e).__name__}: {e}")
@@ -85,7 +85,7 @@ class LetterToImageMapper:
     def crop_sub_image_from_image(self, key: str, w: int, h: int,
                                   center: Tuple, color=0xFFFFFFFF,
                                   bg_color=0x00000000):
-        self.mlx.letter_map[key] = ImageOperations.generate_blank_image(
+        self.mlx.base_letter_map[key] = ImageOperations.generate_blank_image(
             self.mlx, w, h)
-        ImageOperations.crop_img(self.mlx.letter_map[key],
+        ImageOperations.crop_img(self.mlx.base_letter_map[key],
                                  self.mlx.letter_img, center)

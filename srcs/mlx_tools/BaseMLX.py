@@ -13,17 +13,21 @@ class MlxVar:
         self.screen_h = 0
         self.buff_img = ImgData()
         self.static_bg = ImgData()
-        self.drone_img = ImgData()
-        self.animation_counter = 0
+
+
+class MlxVarWithLetters(MlxVar):
+    def __init__(self) -> None:
+        super().__init__()
         self.letter_img = ImgData()
-        self.letter_map: Dict[str, ImgData] = {}
+        self.base_letter_map: Dict[str, ImgData] = {}
+        self.extended_letter_map: Dict[str, ImgData] = {}
 
 
 class MyMLX:
     def __init__(self, w: int, h: int):
         self.w = w
         self.h = h
-        self.mlx = MlxVar()
+        self.mlx = MlxVarWithLetters()
         self.init_mlx()
 
     def init_mlx(self):
@@ -40,10 +44,11 @@ class MyMLX:
             # print(f"Buffer image: {self.mlx.mlx.mlx_get_data_addr(
             # self.mlx.buff_img.img)}")
             self.mlx.mlx.mlx_clear_window(self.mlx.mlx_ptr, self.mlx.win_ptr)
-            self.mlx.mlx.mlx_mouse_hook(self.mlx.win_ptr, self.mymouse, self.mlx)
+            self.mlx.mlx.mlx_mouse_hook(self.mlx.win_ptr,
+                                        self.mymouse, self.mlx)
             self.mlx.mlx.mlx_key_hook(self.mlx.win_ptr, self.mykey, self.mlx)
             self.mlx.mlx.mlx_hook(self.mlx.win_ptr, 33, 0,
-                                  self.gere_close, self.mlx)
+                                  self.stop_mlx, self.mlx)
         except Exception as e:
             raise MLXError(
                 f"Mlx initialization failed. {type(e).__name__}: {e}")
@@ -54,11 +59,25 @@ class MyMLX:
     def start_mlx(self):
         self.mlx.mlx.mlx_loop(self.mlx.mlx_ptr)
 
-    def stop_mlx(self):
+    def stop_mlx(self, mlx_var):
         self.mlx.mlx.mlx_loop_exit(self.mlx.mlx_ptr)
-        self.mlx.mlx.mlx_destroy_image(self.mlx.mlx, self.mlx.buff_img.img)
-        self.mlx.mlx.mlx_destroy_image(self.mlx.mlx, self.mlx.static_bg.img)
-        self.mlx.mlx.mlx_destroy_window(self.mlx.mlx, self.mlx.win_ptr)
+        self.clean_mlx()
+
+    def clean_mlx(self):
+        self.mlx.mlx.mlx_destroy_image(self.mlx.mlx_ptr,
+                                       self.mlx.buff_img.img)
+        self.mlx.mlx.mlx_destroy_image(self.mlx.mlx_ptr,
+                                       self.mlx.static_bg.img)
+        if self.mlx.letter_img.img is not None:
+            self.mlx.mlx.mlx_destroy_image(self.mlx.mlx_ptr,
+                                           self.mlx.letter_img.img)
+        if len(self.mlx.base_letter_map) > 0:
+            for _, val in self.mlx.base_letter_map.items():
+                self.mlx.mlx.mlx_destroy_image(self.mlx.mlx_ptr, val.img)
+        if len(self.mlx.base_letter_map) > 0:
+            for _, val in self.mlx.extended_letter_map.items():
+                self.mlx.mlx.mlx_destroy_image(self.mlx.mlx_ptr, val.img)
+        self.mlx.mlx.mlx_destroy_window(self.mlx.mlx_ptr, self.mlx.win_ptr)
 
     def mymouse(self, button, x, y, mystuff):
         print(f"Got mouse event! button {button} at {x},{y}.")
@@ -68,9 +87,6 @@ class MyMLX:
         # print(f"Got key {keynum}, and got my stuff back:")
         # if keynum == 112:
         #     print("Next Move")
-
-    def gere_close(self, mlx_var):
-        mlx_var.mlx.mlx_loop_exit(mlx_var.mlx_ptr)
 
     def put_buffer_image(self):
         if self.mlx.buff_img is not None:
