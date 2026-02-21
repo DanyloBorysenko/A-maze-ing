@@ -237,7 +237,7 @@ class TxtToImage:
 
     def print_txt(self, mlx: MlxVar, buff_img: ImgData, txt: str,
                   origin: Tuple, factor: float = 1.0, font_color=0xFFFFFFFF,
-                  bg_color=0x00000000):
+                  bg_color=0x00000000) -> int:
         x, y = origin
         for letter in txt:
             try:
@@ -259,6 +259,7 @@ class TxtToImage:
                 raise OperationError(
                     f"Unable to print '{letter}'-> {type(e).__name__}: {e}"
                 )
+        return x
 
 
 def tester():

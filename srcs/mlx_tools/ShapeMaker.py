@@ -7,10 +7,8 @@ from srcs.mlx_tools.ImageOperations import ImageOperations, ImgData
 
 
 class ShapeGenerator:
-    def __init__(self, mlx_var: MlxVar) -> None:
-        self.mlx_var = mlx_var
-
-    def draw_line(self, img: ImgData, coordinate: Tuple,
+    @staticmethod
+    def draw_line(mlx_var: MlxVar, img: ImgData, coordinate: Tuple,
                   len: int, direction: str = "v",
                   color=0xFFFFFFFF, thickness: int = 1) -> None:
         x, y = coordinate
@@ -42,7 +40,8 @@ class ShapeGenerator:
             raise ParametersError(f"Drawing line failed. Unknown direction: "
                   f"{direction}. Allowed directions are 'v' and 'h'")
 
-    def draw_hollow_square(self, img: ImgData, center: Tuple,
+    @staticmethod
+    def draw_hollow_square(mlx_var: MlxVar, img: ImgData, center: Tuple,
                            len: int, color=0xFFFFFFFF):
         try:
             x, y = center
@@ -50,14 +49,15 @@ class ShapeGenerator:
                 raise ParametersError(
                     "Drawing hollow square failed. center coordinate need to be "
                     f"integer ({center})")
-            self.draw_line(img, (x - len // 2, y + len // 2), len, "h", color)
-            self.draw_line(img, (x - len // 2, y - len // 2), len, "h", color)
-            self.draw_line(img, (x + len // 2, y - len // 2), len, "v", color)
-            self.draw_line(img, (x - len // 2, y - len // 2), len, "v", color)
+            ShapeGenerator.draw_line(mlx_var, img, (x - len // 2, y + len // 2), len, "h", color)
+            ShapeGenerator.draw_line(mlx_var, img, (x - len // 2, y - len // 2), len, "h", color)
+            ShapeGenerator.draw_line(mlx_var, img, (x + len // 2, y - len // 2), len, "v", color)
+            ShapeGenerator.draw_line(mlx_var, img, (x - len // 2, y - len // 2), len, "v", color)
         except Exception as e:
             raise ImgError(f"Drawing hollow square failed.-> {e}")
-
-    def draw_filled_rectangle(self, img: ImgData, center: Tuple,
+    
+    @staticmethod
+    def draw_filled_rectangle(mlx_var: MlxVar, img: ImgData, center: Tuple,
                               h: int, w: int, color=0xFFFFFFFF):
         try:
             x, y = center
@@ -66,6 +66,6 @@ class ShapeGenerator:
                     "Drawing filled rectangle failed. center coordinate "
                     f"need to be integer ({center})")
             for i in range(y, y + h):
-                self.draw_line(img, (x, i), h, "h", color)
+                ShapeGenerator.draw_line(mlx_var, img, (x, i), w, "h", color)
         except Exception as e:
             raise ImgError(f"Drawing filled rectangle failed.-> {e}")

@@ -24,7 +24,8 @@ class MlxVarWithLetters(MlxVar):
 
 
 class MyMLX:
-    def __init__(self, w: int, h: int):
+    def __init__(self, name: str, w: int, h: int):
+        self.name = name
         self.w = w
         self.h = h
         self.mlx = MlxVarWithLetters()
@@ -35,7 +36,7 @@ class MyMLX:
             self.mlx.mlx = Mlx()
             self.mlx.mlx_ptr = self.mlx.mlx.mlx_init()
             self.mlx.win_ptr = self.mlx.mlx.mlx_new_window(
-                self.mlx.mlx_ptr, self.w, self.h, "GUI")
+                self.mlx.mlx_ptr, self.w, self.h, self.name)
             self.mlx.buff_img = ImageOperations.generate_blank_image(
                 self.mlx, self.w, self.h)
             self.mlx.static_bg = ImageOperations.generate_blank_image(
@@ -82,7 +83,7 @@ class MyMLX:
     def mymouse(self, button, x, y, mystuff):
         print(f"Got mouse event! button {button} at {x},{y}.")
 
-    def mykey(self, keynum, mlx_var):
+    def mykey(self, key_num, mlx_var):
         pass
         # print(f"Got key {keynum}, and got my stuff back:")
         # if keynum == 112:
